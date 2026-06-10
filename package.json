@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "ts-node src/server.ts",
+    "demo": "ts-node scripts/demo.ts",
     "build": "tsc",
     "start": "node dist/server.js",
     "test": "jest"
