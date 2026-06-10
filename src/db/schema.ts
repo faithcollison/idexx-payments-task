@@ -1,4 +1,4 @@
-import { DB } from './database';
+import { DB } from "./database";
 
 export function initSchema(db: DB): void {
   db.exec(`
@@ -22,10 +22,9 @@ export function initSchema(db: DB): void {
     );
 
     CREATE TABLE IF NOT EXISTS webhook_events (
-      eventId TEXT PRIMARY KEY,
+      id TEXT PRIMARY KEY,
       paymentId TEXT NOT NULL REFERENCES payments(id),
       eventType TEXT NOT NULL,
-      amountCents INTEGER,
       createdAt TEXT NOT NULL DEFAULT (datetime('now'))
     );
 

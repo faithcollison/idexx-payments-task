@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const createPaymentSchema = z.object({
   clinicId: z.string().min(1),
@@ -8,9 +8,14 @@ export const createPaymentSchema = z.object({
 });
 
 export const webhookPayloadSchema = z.object({
-  eventId: z.string().min(1),
+  id: z.string().min(1),
   paymentId: z.string().min(1),
-  type: z.enum(['payment.authorised', 'payment.captured', 'payment.refunded', 'payment.failed']),
+  eventType: z.enum([
+    "payment.authorised",
+    "payment.captured",
+    "payment.refunded",
+    "payment.failed",
+  ]),
   amountCents: z.number().int().positive().optional(),
 });
 

@@ -22,7 +22,7 @@ export interface PaymentEvent {
 }
 
 export interface WebhookEvent {
-  eventId: string;
+  id: string;
   paymentId: string;
   eventType: WebhookEventType;
   amountCents: number | null;

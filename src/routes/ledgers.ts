@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { DB } from '../db/database';
-import { LedgerEntry } from '../types';
+import { getLedgerEntriesByClinic } from '../services/ledgers.service';
 
 export function ledgersRouter(db: DB): Router {
   const router = Router();
@@ -8,9 +8,7 @@ export function ledgersRouter(db: DB): Router {
   router.get('/:clinicId', (req, res) => {
     const { clinicId } = req.params;
 
-    const entries = db
-      .prepare('SELECT * FROM ledger_entries WHERE clinicId = ? ORDER BY createdAt ASC')
-      .all(clinicId) as LedgerEntry[];
+    const entries = getLedgerEntriesByClinic(db, clinicId);
 
     const totalRevenue = entries
       .filter((e) => e.eventType === 'captured')
