@@ -39,6 +39,10 @@ export function webhooksRouter(db: DB): Router {
       });
     }
 
+    if (eventType === "payment.captured" && refundAmountCents !== undefined) {
+      return res.status(400).json({ error: "refundAmountCents should not be provided for capture events" });
+    }
+
     if (eventType === "payment.refunded") {
       if (refundAmountCents === undefined) {
         return res.status(400).json({ error: "amount is required for refund events" });
