@@ -1,11 +1,11 @@
-import request from 'supertest';
-import { createApp } from '../src/app';
-import { createDatabase } from '../src/db/database';
+import request from "supertest";
+import { createApp } from "../src/app";
+import { createDatabase } from "../src/db/database";
 
 type TestApp = Parameters<typeof request>[0];
 
 export function createTestApp() {
-  const db = createDatabase(':memory:');
+  const db = createDatabase(":memory:");
   const app = createApp(db);
   return { app, db };
 }
@@ -18,14 +18,14 @@ export function uid(): string {
 
 export async function createPayment(
   app: TestApp,
-  overrides: Record<string, unknown> = {}
+  overrides: Record<string, unknown> = {},
 ) {
   const res = await request(app)
-    .post('/payments')
+    .post("/payments")
     .send({
-      clinicId: 'clinic-1',
+      clinicId: "clinic-1",
       amountCents: 10000,
-      currency: 'USD',
+      currency: "USD",
       idempotencyKey: uid(),
       ...overrides,
     });
@@ -37,15 +37,15 @@ export async function createPayment(
   };
 }
 
-export async function advanceToCapture(
-  app: TestApp,
-  paymentId: string,
-  amountCents = 10000
-) {
-  await request(app)
-    .post('/webhooks')
-    .send({ eventId: uid(), paymentId, type: 'payment.authorised', amountCents });
-  await request(app)
-    .post('/webhooks')
-    .send({ eventId: uid(), paymentId, type: 'payment.captured', amountCents });
+export async function advanceToCapture(app: TestApp, paymentId: string) {
+  await request(app).post("/webhooks").send({
+    eventId: uid(),
+    paymentId,
+    eventType: "payment.authorised",
+  });
+  await request(app).post("/webhooks").send({
+    eventId: uid(),
+    paymentId,
+    eventType: "payment.captured",
+  });
 }
