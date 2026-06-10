@@ -1,5 +1,5 @@
 {
-  "name": "idexx-prep",
+  "name": "idexx-payments-task",
   "version": "1.0.0",
   "scripts": {
     "dev": "ts-node src/server.ts",
