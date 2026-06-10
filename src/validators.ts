@@ -8,7 +8,7 @@ export const createPaymentSchema = z.object({
 });
 
 export const webhookPayloadSchema = z.object({
-  id: z.string().min(1),
+  eventId: z.string().min(1),
   paymentId: z.string().min(1),
   eventType: z.enum([
     "payment.authorised",
@@ -16,7 +16,7 @@ export const webhookPayloadSchema = z.object({
     "payment.refunded",
     "payment.failed",
   ]),
-  amountCents: z.number().int().positive().optional(),
+  refundAmountCents: z.number().int().positive().optional(),
 });
 
 export type CreatePaymentInput = z.infer<typeof createPaymentSchema>;

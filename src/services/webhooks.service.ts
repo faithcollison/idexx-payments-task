@@ -14,44 +14,60 @@ export function getWebhookEvent(
 export function processWebhookEvent(
   db: DB,
   params: {
-    id: string;
+    eventId: string;
     paymentId: string;
     eventType: string;
     currentStatus: string;
     clinicId: string;
     nextStatus: PaymentStatus;
+    captureAmountCents?: number;
     refundAmountCents?: number;
   },
 ): void {
-  const { id, paymentId, eventType, currentStatus, clinicId, nextStatus, refundAmountCents } = params;
+  const {
+    eventId,
+    paymentId,
+    eventType,
+    currentStatus,
+    clinicId,
+    nextStatus,
+    captureAmountCents,
+    refundAmountCents,
+  } = params;
 
   db.transaction(() => {
     const now = new Date().toISOString();
 
     db.prepare(
       `INSERT INTO webhook_events (id, paymentId, eventType, createdAt) VALUES (?, ?, ?, ?)`,
-    ).run(id, paymentId, eventType, now);
+    ).run(eventId, paymentId, eventType, now);
 
     db.prepare(
       `INSERT INTO payment_events (id, paymentId, fromStatus, toStatus, createdAt) VALUES (?, ?, ?, ?, ?)`,
     ).run(randomUUID(), paymentId, currentStatus, nextStatus, now);
 
-    db.prepare("UPDATE payments SET status = ? WHERE id = ?").run(nextStatus, paymentId);
+    db.prepare("UPDATE payments SET status = ? WHERE id = ?").run(
+      nextStatus,
+      paymentId,
+    );
 
     if (eventType === "payment.captured") {
-      const { amountCents } = db
-        .prepare("SELECT amountCents FROM payments WHERE id = ?")
-        .get(paymentId) as { amountCents: number };
-
       db.prepare(
         `INSERT INTO ledger_entries (id, paymentId, clinicId, eventType, amountCents, createdAt) VALUES (?, ?, ?, ?, ?, ?)`,
-      ).run(randomUUID(), paymentId, clinicId, "captured", amountCents, now);
+      ).run(randomUUID(), paymentId, clinicId, "captured", captureAmountCents, now);
     }
 
     if (eventType === "payment.refunded") {
       db.prepare(
         `INSERT INTO ledger_entries (id, paymentId, clinicId, eventType, amountCents, createdAt) VALUES (?, ?, ?, ?, ?, ?)`,
-      ).run(randomUUID(), paymentId, clinicId, "refunded", refundAmountCents, now);
+      ).run(
+        randomUUID(),
+        paymentId,
+        clinicId,
+        "refunded",
+        refundAmountCents,
+        now,
+      );
     }
   })();
 }

@@ -20,9 +20,9 @@ export function webhooksRouter(db: DB): Router {
       return res.status(400).json({ error: parsed.error.format() });
     }
 
-    const { id, paymentId, eventType, amountCents } = parsed.data;
+    const { eventId, paymentId, eventType, refundAmountCents } = parsed.data;
 
-    const existingEvent = getWebhookEvent(db, id);
+    const existingEvent = getWebhookEvent(db, eventId);
     if (existingEvent) {
       return res.status(200).json({ message: "Event already processed" });
     }
@@ -40,26 +40,27 @@ export function webhooksRouter(db: DB): Router {
     }
 
     if (eventType === "payment.refunded") {
-      if (amountCents === undefined) {
-        return res.status(400).json({ error: "amountCents is required for refund events" });
+      if (refundAmountCents === undefined) {
+        return res.status(400).json({ error: "amount is required for refund events" });
       }
 
       const totalRefunded = getTotalRefundedForPayment(db, paymentId);
-      if (totalRefunded + amountCents > payment.amountCents) {
+      if (totalRefunded + refundAmountCents > payment.amountCents) {
         return res.status(422).json({
-          error: `Refund of ${amountCents} would exceed available amount`,
+          error: `Refund of ${refundAmountCents} would exceed available amount`,
         });
       }
     }
 
     processWebhookEvent(db, {
-      id,
+      eventId,
       paymentId,
       eventType,
       currentStatus: payment.status,
       clinicId: payment.clinicId,
       nextStatus,
-      refundAmountCents: amountCents,
+      captureAmountCents: payment.amountCents,
+      refundAmountCents,
     });
 
     return res.status(200).json({ message: "Event processed successfully" });
