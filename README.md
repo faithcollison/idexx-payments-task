@@ -4,11 +4,11 @@ A payment processing API built with Express, TypeScript, and SQLite that handles
 
 ## Setup
 
-**Requirements:** Node.js 20+ (developed and tested on Node 20 LTS), npm
+**Requirements:** Node.js 24+, npm
 
 If you use nvm:
 ```bash
-nvm use 20
+nvm use 24
 ```
 
 ```bash
