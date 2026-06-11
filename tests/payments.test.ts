@@ -108,7 +108,7 @@ describe("GET /payments/:id", () => {
     await request(app).post("/webhooks").send({
       eventId: uid(),
       paymentId: id,
-      eventType: "payment.authorised",
+      eventType: "payment.authorized",
     });
     await request(app).post("/webhooks").send({
       eventId: uid(),

@@ -11,7 +11,7 @@ export const webhookPayloadSchema = z.object({
   eventId: z.string().min(1),
   paymentId: z.string().min(1),
   eventType: z.enum([
-    "payment.authorised",
+    "payment.authorized",
     "payment.captured",
     "payment.refunded",
     "payment.failed",

@@ -38,7 +38,7 @@ async function main() {
   const { status: s2 } = await post('/webhooks', {
     eventId: `evt-auth-${Date.now()}`,
     paymentId,
-    eventType: 'payment.authorised',
+    eventType: 'payment.authorized',
   });
   console.log(`\n[2] Authorise webhook (${s2})`);
 

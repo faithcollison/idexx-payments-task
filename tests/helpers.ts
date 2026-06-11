@@ -41,7 +41,7 @@ export async function advanceToCapture(app: TestApp, paymentId: string) {
   await request(app).post("/webhooks").send({
     eventId: uid(),
     paymentId,
-    eventType: "payment.authorised",
+    eventType: "payment.authorized",
   });
   await request(app).post("/webhooks").send({
     eventId: uid(),

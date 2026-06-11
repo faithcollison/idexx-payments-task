@@ -1,13 +1,13 @@
 export const VALID_PAYMENT_STATUSES = [
   "pending",
-  "authorised",
+  "authorized",
   "captured",
   "refunded",
   "failed",
 ] as const;
 export type PaymentStatus = (typeof VALID_PAYMENT_STATUSES)[number];
 export type WebhookEventType =
-  | "payment.authorised"
+  | "payment.authorized"
   | "payment.captured"
   | "payment.refunded"
   | "payment.failed";

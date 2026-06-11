@@ -10,12 +10,12 @@ describe("POST /webhooks — duplicate eventId", () => {
     const first = await request(app).post("/webhooks").send({
       eventId,
       paymentId: payment.id,
-      eventType: "payment.authorised",
+      eventType: "payment.authorized",
     });
     const second = await request(app).post("/webhooks").send({
       eventId,
       paymentId: payment.id,
-      eventType: "payment.authorised",
+      eventType: "payment.authorized",
     });
 
     expect(first.status).toBe(200);
@@ -24,7 +24,7 @@ describe("POST /webhooks — duplicate eventId", () => {
     const detail = await request(app).get(`/payments/${payment.id}`);
 
     expect(detail.body.statusHistory).toHaveLength(1);
-    expect(detail.body.statusHistory[0].toStatus).toBe("authorised");
+    expect(detail.body.statusHistory[0].toStatus).toBe("authorized");
   });
 });
 
@@ -70,7 +70,7 @@ describe("POST /webhooks — invalid transitions", () => {
     const res = await request(app).post("/webhooks").send({
       eventId: uid(),
       paymentId: payment.id,
-      eventType: "payment.authorised",
+      eventType: "payment.authorized",
     });
 
     expect(res.status).toBe(422);
