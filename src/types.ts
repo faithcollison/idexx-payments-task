@@ -1,7 +1,17 @@
-export const VALID_PAYMENT_STATUSES = ['pending', 'authorised', 'captured', 'refunded', 'failed'] as const;
-export type PaymentStatus = typeof VALID_PAYMENT_STATUSES[number];
-export type WebhookEventType = 'payment.authorised' | 'payment.captured' | 'payment.refunded' | 'payment.failed';
-export type LedgerEventType = 'captured' | 'refunded';
+export const VALID_PAYMENT_STATUSES = [
+  "pending",
+  "authorised",
+  "captured",
+  "refunded",
+  "failed",
+] as const;
+export type PaymentStatus = (typeof VALID_PAYMENT_STATUSES)[number];
+export type WebhookEventType =
+  | "payment.authorised"
+  | "payment.captured"
+  | "payment.refunded"
+  | "payment.failed";
+export type LedgerEventType = "captured" | "refunded";
 
 export interface Payment {
   id: string;
@@ -26,7 +36,6 @@ export interface WebhookEvent {
   id: string;
   paymentId: string;
   eventType: WebhookEventType;
-  amountCents: number | null;
   createdAt: string;
 }
 
