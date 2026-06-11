@@ -2,6 +2,49 @@ import request from "supertest";
 import { createTestApp, createPayment, advanceToCapture, uid } from "./helpers";
 
 describe("GET /ledgers/:clinicId", () => {
+  it("gets list of ledger entries for clinic id", async () => {
+    const { app } = createTestApp();
+
+    const payment = await createPayment(app, {
+      clinicId: "clinic-entries",
+      amountCents: 10000,
+    });
+    await advanceToCapture(app, payment.id);
+
+    await request(app).post("/webhooks").send({
+      eventId: uid(),
+      paymentId: payment.id,
+      eventType: "payment.refunded",
+      refundAmountCents: 4000,
+    });
+
+    const res = await request(app).get("/ledgers/clinic-entries");
+
+    expect(res.status).toBe(200);
+    expect(res.body.entries).toHaveLength(2);
+
+    const capture = res.body.entries.find(
+      (e: { eventType: string }) => e.eventType === "captured",
+    );
+    const refund = res.body.entries.find(
+      (e: { eventType: string }) => e.eventType === "refunded",
+    );
+
+    expect(capture).toMatchObject({
+      paymentId: payment.id,
+      clinicId: "clinic-entries",
+      eventType: "captured",
+      amountCents: 10000,
+    });
+
+    expect(refund).toMatchObject({
+      paymentId: payment.id,
+      clinicId: "clinic-entries",
+      eventType: "refunded",
+      amountCents: 4000,
+    });
+  });
+
   it("net revenue equals captured revenue minus refunds", async () => {
     const { app } = createTestApp();
 
@@ -42,7 +85,6 @@ describe("GET /ledgers/:clinicId", () => {
     });
     await advanceToCapture(app, p2.id);
 
-    // Refund part of p1
     await request(app).post("/webhooks").send({
       eventId: uid(),
       paymentId: p1.id,
@@ -50,7 +92,6 @@ describe("GET /ledgers/:clinicId", () => {
       refundAmountCents: 2000,
     });
 
-    // Refund all of p2
     await request(app).post("/webhooks").send({
       eventId: uid(),
       paymentId: p2.id,
