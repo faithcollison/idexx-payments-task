@@ -5,6 +5,7 @@ import { getNextStatus } from "../transitions";
 import {
   getPaymentById,
   getTotalRefundedForPayment,
+  getTotalCapturedForPayment,
 } from "../services/payments.service";
 import {
   getWebhookEvent,
@@ -39,17 +40,26 @@ export function webhooksRouter(db: DB): Router {
       });
     }
 
-    if (eventType === "payment.captured" && refundAmountCents !== undefined) {
-      return res.status(400).json({ error: "refundAmountCents should not be provided for capture events" });
+    let captureAmountCents;
+    if (eventType === "payment.captured") {
+      if (refundAmountCents !== undefined) {
+        return res.status(400).json({
+          error: "refundAmountCents should not be provided for capture events",
+        });
+      }
+      captureAmountCents = payment.amountCents;
     }
 
     if (eventType === "payment.refunded") {
       if (refundAmountCents === undefined) {
-        return res.status(400).json({ error: "amount is required for refund events" });
+        return res
+          .status(400)
+          .json({ error: "amount is required for refund events" });
       }
 
       const totalRefunded = getTotalRefundedForPayment(db, paymentId);
-      if (totalRefunded + refundAmountCents > payment.amountCents) {
+      const totalCaptured = getTotalCapturedForPayment(db, paymentId);
+      if (totalRefunded + refundAmountCents > totalCaptured) {
         return res.status(422).json({
           error: `Refund of ${refundAmountCents} would exceed available amount`,
         });
@@ -63,7 +73,7 @@ export function webhooksRouter(db: DB): Router {
       currentStatus: payment.status,
       clinicId: payment.clinicId,
       nextStatus,
-      captureAmountCents: payment.amountCents,
+      captureAmountCents,
       refundAmountCents,
     });
 
