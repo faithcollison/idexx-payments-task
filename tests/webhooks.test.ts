@@ -61,13 +61,11 @@ describe("POST /webhooks — invalid transitions", () => {
     const { app } = createTestApp();
     const payment = await createPayment(app);
 
-    await request(app)
-      .post("/webhooks")
-      .send({
-        eventId: uid(),
-        paymentId: payment.id,
-        eventType: "payment.failed",
-      });
+    await request(app).post("/webhooks").send({
+      eventId: uid(),
+      paymentId: payment.id,
+      eventType: "payment.failed",
+    });
 
     const res = await request(app).post("/webhooks").send({
       eventId: uid(),
@@ -110,7 +108,6 @@ describe("POST /webhooks — partial refunds", () => {
     const payment = await createPayment(app, { amountCents: 10000 });
     await advanceToCapture(app, payment.id);
 
-    // Partially refund 6000
     await request(app).post("/webhooks").send({
       eventId: uid(),
       paymentId: payment.id,
@@ -129,7 +126,7 @@ describe("POST /webhooks — partial refunds", () => {
     expect(over.body.error).toMatch(/exceed/i);
   });
 
-  it("allows a refund that exactly exhausts the captured amount", async () => {
+  it("allows a refund that exactly matches the captured amount", async () => {
     const { app } = createTestApp();
     const payment = await createPayment(app, { amountCents: 10000 });
     await advanceToCapture(app, payment.id);

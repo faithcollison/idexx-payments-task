@@ -67,6 +67,27 @@ describe("GET /payments", () => {
       expect(p.status).toBe("pending"),
     );
   });
+
+  it("filters by both status and clinicId", async () => {
+    const { app } = createTestApp();
+
+    await request(app)
+      .post("/payments")
+      .send({ ...BASE_PAYLOAD, clinicId: "clinic-a", idempotencyKey: uid() });
+
+    await request(app)
+      .post("/payments")
+      .send({ ...BASE_PAYLOAD, clinicId: "clinic-b", idempotencyKey: uid() });
+
+    const res = await request(app).get(
+      "/payments?clinicId=clinic-a&status=pending",
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(1);
+    expect(res.body[0].clinicId).toBe("clinic-a");
+    expect(res.body[0].status).toBe("pending");
+  });
 });
 
 describe("GET /payments/:id", () => {
@@ -94,11 +115,17 @@ describe("GET /payments/:id", () => {
       paymentId: id,
       eventType: "payment.captured",
     });
+    await request(app).post("/webhooks").send({
+      eventId: uid(),
+      paymentId: id,
+      eventType: "payment.refunded",
+      refundAmountCents: 2000,
+    });
 
     const detail = await request(app).get(`/payments/${id}`);
     expect(detail.status).toBe(200);
-    expect(detail.body.statusHistory).toHaveLength(2);
+    expect(detail.body.statusHistory).toHaveLength(3);
     expect(detail.body.totalCaptured).toBe(5000);
-    expect(detail.body.totalRefunded).toBe(0);
+    expect(detail.body.totalRefunded).toBe(2000);
   });
 });
