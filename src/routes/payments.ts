@@ -2,6 +2,7 @@ import { Router } from "express";
 import { createHash } from "crypto";
 import { v4 as randomUUID } from "uuid";
 import { DB } from "../db/database";
+import { VALID_PAYMENT_STATUSES } from "../types";
 import { createPaymentSchema } from "../validators";
 import {
   getPayments,
@@ -18,6 +19,13 @@ export function paymentsRouter(db: DB): Router {
 
   router.get("/", (req, res) => {
     const { clinicId, status } = req.query;
+
+    if (status !== undefined && !VALID_PAYMENT_STATUSES.includes(status as any)) {
+      return res.status(400).json({
+        error: `Invalid status. Must be one of: ${VALID_PAYMENT_STATUSES.join(", ")}`,
+      });
+    }
+
     const payments = getPayments(
       db,
       clinicId as string | undefined,

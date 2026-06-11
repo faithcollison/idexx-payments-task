@@ -1,4 +1,5 @@
-export type PaymentStatus = 'pending' | 'authorised' | 'captured' | 'refunded' | 'failed';
+export const VALID_PAYMENT_STATUSES = ['pending', 'authorised', 'captured', 'refunded', 'failed'] as const;
+export type PaymentStatus = typeof VALID_PAYMENT_STATUSES[number];
 export type WebhookEventType = 'payment.authorised' | 'payment.captured' | 'payment.refunded' | 'payment.failed';
 export type LedgerEventType = 'captured' | 'refunded';
 
